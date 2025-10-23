@@ -66,7 +66,13 @@ local VectorProperties = {
     end
 }
 
-VectorProperties.__index = VectorProperties
+-- Allow numeric indexing to access point coordinates (e.g., v[1])
+VectorProperties.__index = function(s, k)
+    if type(k) == "number" then
+        return s.points[k]
+    end
+    return VectorProperties[k]
+end
 
 
 
@@ -98,14 +104,16 @@ end
 
 
 
-function VectorSystem:transformInVector(t)
-    local t = t
-    if type(t)=="function" then  
-        t=t()
-    elseif type(t)~="table" then
+function VectorSystem.transformInVector(t)
+    if type(t)=="table" then
+        return VectorSystem.CreateVector(table.unpack(t)) 
+        
+    elseif type(t)=="function" then  
+        return VectorSystem.CreateVector(table.unpack(t())) 
+    else
         error("expected a table or function in this function")
     end
-    return self.CreateVector(table.unpack(t)) 
+    
 end
 
 return VectorSystem
