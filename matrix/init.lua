@@ -2,12 +2,6 @@
 local MatrixSystem = {}
 
 local MatrixProperties = {
-    __index = function(s, k)
-        if type(k) == "number" then
-            return s.data[k]
-        end
-        return MatrixProperties[k]
-    end,
 
     getItem = function(m, row, col)
         if row < 1 or row > m.nrows or col < 1 or col > m.ncols then
@@ -67,6 +61,11 @@ local MatrixProperties = {
         return m1.ncols == m2.ncols and m1.nrows == m2.nrows 
     end,
 
+    isSquare = function(m1)
+        if not MatrixSystem.isMatrix(m2) then error(m2 .. " not are matrix") end
+        return m1.ncols == m1.nrows
+    end,
+
     __add = function(m1, m2)
         if not m1:isCompatibleForSum(m2) then
             error("As matrizes devem ter as mesmas dimensões para adição.")
@@ -77,8 +76,64 @@ local MatrixProperties = {
         end)
 
         return m1
+    end,
+
+    submatrix = function(m1, row, col)
+        local m = m1.data
+        local sub = {}
+        for i = 1, #m do
+            if i ~= row then
+                local new_row = {}
+                for j = 1, #m[i] do
+                    if j ~= col then
+                        table.insert(new_row, m[i][j])
+                    end
+                end
+                table.insert(sub, new_row)
+            end
+        end
+        sub = MatrixSystem.transformInMatrix(sub)
+        return sub
+    end,
+
+    determinant = function (m1)
+        local m = m1.data
+        local n = #m
+
+        if n == 1 then 
+            return 
+                m[1][1] 
+        end
+        if n == 2 then 
+            return 
+                m[1][1] * m[2][2] - 
+                m[1][2] * m[2][1] 
+        end
+        if n == 3 then return 
+            m[1][1] * (m[2][2]*m[3][3] - m[2][3]*m[3][2]) + 
+            m[1][2] * (m[2][3]*m[3][1] - m[2][1]*m[3][3]) + 
+            m[1][3] * (m[2][1]*m[3][2] - m[2][2]*m[3][1])
+        end
+        
+        local det = 0
+        for j = 1, n do
+            local sign = ((j % 2 == 0) and -1 or 1)
+            local sub = m1:submatrix(1, j)
+            det = det + sign * m[1][j] * sub:determinant()
+        end
+
+        return det
     end
+
+
 }
+
+MatrixProperties.__index = function(s, k)
+    if type(k) == "number" then
+        return s.data[k]
+    end
+    return MatrixProperties[k]
+end
 
 
 
