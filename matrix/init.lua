@@ -1,5 +1,3 @@
-package.path = package.path .. ";./../?/init.lua"
-local VS = require("vectors")
 
 local MatrixSystem = {}
 
@@ -44,9 +42,12 @@ local MatrixProperties = {
 
     map = function(m, funct)
         if type(funct) == "function" then        
-            for i = 1, m.nrows do
-                for j = 1, m.ncols do
-                        m.data[i][j] = funct(i, j, m.data[i][j])
+            for row = 1, m.nrows do
+                for col = 1, m.ncols do
+                    
+                    local currentValue = m.data[row][col]                        
+                    m.data[row][col] = funct(row, col, currentValue)
+
                 end
             end
         else 
