@@ -33,10 +33,27 @@ local VectorProperties = {
     end,
 
     __sub = function(v1, v2)
-        local check, dim = v1:checkEquipollence(v2)
-        if not check then error("those vectors is a not equipollents") end
+        if not v1:checkEquipollence(v2) then error("those vectors is a not equipollents") end
 
         return v1 + (-v2)
+    end,
+
+    CrossProduct = function(v1, v2)
+        local check, dim = v1:checkEquipollence(v2)
+        if not check then error("those vectors is a not equipollents") end
+        
+        return VectorSystem.transformInVector(
+            function()
+                local cross 
+                for i=1, dim do
+                    
+                end
+            end
+        )
+    end,
+
+    dot = function(v1, v2)
+        
     end,
     
     checkEquipollence = function(s, otherVector)
