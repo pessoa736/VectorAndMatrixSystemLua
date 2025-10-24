@@ -1,7 +1,6 @@
+package.path = package.path .. ";./?/init.lua"
+
 local V = require "vectors"
 local M = require "matrix"
 
-return {
-    table.unpack(M),
-    table.unpack(V)
-}
+return M, V
