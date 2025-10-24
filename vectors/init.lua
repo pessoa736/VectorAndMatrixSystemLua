@@ -38,22 +38,37 @@ local VectorProperties = {
         return v1 + (-v2)
     end,
 
-    CrossProduct = function(v1, v2)
-        local check, dim = v1:checkEquipollence(v2)
-        if not check then error("those vectors is a not equipollents") end
-        
-        return VectorSystem.transformInVector(
-            function()
-                local cross 
-                for i=1, dim do
-                    
-                end
-            end
-        )
+    map = function(s, fun)
+        local vector = {}
+        for i= 1, s.Dimensions do
+            local currentValue = s.points[i]
+             vector[i] = fun(i, currentValue)
+        end
+        return VectorSystem.transformInVector(vector)
     end,
 
-    dot = function(v1, v2)
+    CrossProduct = function(v1, ...)
+        if #{v1, ...} ~= v1.Dimensions then error() end
         
+        local ms
+        if not package.load["matrix"] then ms = require("matrix") end
+        
+        ms.createMatriz(
+            {},
+            v1,
+            ...
+        )
+    end,
+    dot = function(v1, v2)
+        local check, dim = v1:checkEquipollence(v2)
+        if not check then error("those vectors is a not equipollents") end
+
+        local d = 0
+        for i=1, dim do
+            d = d + v1[i]*v2[i] 
+        end
+
+        return d
     end,
     
     checkEquipollence = function(s, otherVector)
@@ -83,7 +98,6 @@ local VectorProperties = {
     end
 }
 
--- Allow numeric indexing to access point coordinates (e.g., v[1])
 VectorProperties.__index = function(s, k)
     if type(k) == "number" then
         return s.points[k]

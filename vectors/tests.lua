@@ -157,4 +157,14 @@ check("numeric indexing returns coordinates", false,
     end
 )
 
+check("test Dot", false,
+    function()
+        local v1 = vs.CreateVector(3, -5, 3, 4)
+        local v2 = vs.CreateVector(4, 2, 3, -6)
+
+        local v3  =  v1:dot(v2)
+        print(v3)
+    end
+)
+
 
