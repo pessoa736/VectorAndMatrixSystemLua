@@ -1,5 +1,5 @@
 package.path = package.path .. ";./../?/init.lua"
-local vs = require("vectorsSystem")
+local vs = require("vectors")
 
 
 function check(desc, shouldError, fn)
