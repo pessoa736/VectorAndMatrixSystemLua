@@ -173,6 +173,8 @@ check("test CrossNProduct", false,
         local v2 = vs.CreateVector(1, 5, 3)
 
         local re  =  v1:CrossNProduct(v2)
+        print(v1)
+        print(v2)
         print(re)
     end
 )
