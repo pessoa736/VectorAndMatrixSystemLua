@@ -1,8 +1,7 @@
 local MS
-if package.loaded["matrix"] == nil then
-    package.path = package.path .. ";./../?/init.lua"
-    MS = require("matrix")
-end 
+package.path = package.path .. ";./../?/init.lua"
+MS = require("matrix")
+
 
 local VectorSystem = {}
 
@@ -28,7 +27,7 @@ local VectorProperties = {
             function()
                 local result = {}
                 for i=1, s.Dimensions do
-                    result[i] = -s.points[i]
+                    result[i] = -s[i]
                 end
                 return result
             end
@@ -44,10 +43,16 @@ local VectorProperties = {
     map = function(s, fun)
         local vector = {}
         for i= 1, s.Dimensions do
-            local currentValue = s.points[i]
+            local currentValue = s[i]
              vector[i] = fun(i, currentValue)
         end
         return VectorSystem.transformInVector(vector)
+    end,
+
+    OnRun = function(s,fun)
+        for i= 1, s.Dimensions do
+            fun(i, s[i])
+        end
     end,
 
     CrossNProduct = function(v1,...)
@@ -198,7 +203,6 @@ local VectorProperties = {
                     end
 
                     sum = sum + mult1 - mult2
-                    print(sum)
                     Vec[j] = sum
                 end
                 return value 
@@ -306,6 +310,31 @@ function VectorSystem.IsVector(t)
     else
         return false
     end
+end
+
+function VectorSystem.CreateConstVector(dimentions, value)
+    local dimentions = dimentions or 1
+    local value = value or 0
+
+    if dimentions< 1 then error("It is not possible to create a vector with a dimension smaller than 1") end
+
+    return VectorSystem.transformInVector(
+        function ()
+            local v = {}
+            for i=1, dimentions do
+                v[i] = value
+            end
+            return v
+        end
+    )    
+end
+
+function VectorSystem.CreateVectorZero(n)
+    return VectorSystem.CreateConstVector(n, 0)
+end
+
+function VectorSystem.CreateVectorOne(n)
+    return VectorSystem.CreateConstVector(n, 1)
 end
 
 return VectorSystem
