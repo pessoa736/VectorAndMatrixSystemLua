@@ -195,6 +195,18 @@ check("determinant: 5x5 ", false, function()
     return d
 end, { input = "M=5x5" })
 
+check("Extenddeterminant: 3x3 ", false, function()
+    local M = ms.createMatriz(
+        {"i", "j", "k", "L", "T"}, 
+        {1, -1, -1, 2, 3}, 
+        {1, -1, 1, 4, 5}, 
+        {1, 0, 1, 3, -5}, 
+        {1, -1, 1, 4, 1}
+    )
+    local d = M:ExtendDeterminant()
+    return d
+end, { input = "M=5x5" })
+
 -- transformInMatrix
 check("transformInMatrix: from table", false, function()
     local M = ms.transformInMatrix({{1, 2}, {3, 4}})

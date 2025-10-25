@@ -1,5 +1,8 @@
-package.path = package.path .. ";./../?/init.lua"
-local MS = require("matrix") 
+local MS
+if package.loaded["matrix"] == nil then
+    package.path = package.path .. ";./../?/init.lua"
+    MS = require("matrix")
+end 
 
 local VectorSystem = {}
 
@@ -47,18 +50,120 @@ local VectorProperties = {
         return VectorSystem.transformInVector(vector)
     end,
 
-    CrossProduct = function(v1, ...)
-        if #{v1, ...} ~= v1.Dimensions then error() end
-        
-        local ms
-        if not package.load["matrix"] then ms = require("matrix") end
-        
-        ms.createMatriz(
-            {},
-            v1,
-            ...
-        )
+    -- CrossNProduct = function(...)
+    --     local vectors = {...}
+
+    --     local firstLine = {}
+    --     for i=1, #vectors+1 do
+    --         firstLine[i] = string.char(i)
+    --     end
+
+    --     local det = MS.createMatriz(firstLine, unpack(vectors)):ExtendDeterminant()
+
+    -- end,
+
+    CrossNProduct = function(...)
+        local vectors = {...}
+        if #vectors == 0 then error("esperado pelo menos 1 vetor") end
+
+        local n = vectors[1].Dimensions
+        for i = 2, #vectors do
+            local ok = vectors[1]:checkEquipollence(vectors[i])
+            if not ok then error("vetores não equipolentes") end
+        end
+        if #vectors ~= n - 1 then
+            error("para produto vetorial em R^" .. n .. " são necessários " .. (n - 1) .. " vetores")
+        end
+
+        local function extractCoefficientsToVector(expr, n)
+            if type(expr) ~= "string" then expr = tostring(expr or "") end
+
+            -- remove espaços
+            expr = expr:gsub("%s+", "")
+            local len = #expr
+            local pos = 1
+
+            local coeffs = {}
+            for i = 1, n do coeffs[i] = 0 end
+
+            local function add(sym, num, sign)
+                if not sym then return end
+                local ch = sym:sub(1,1):lower()
+                local idx = string.byte(ch) - 96
+                if idx < 1 or idx > n then return end
+                local coef = tonumber(num or "1") or 1
+                if sign == "-" then coef = -coef end
+                coeffs[idx] = coeffs[idx] + coef
+            end
+
+            local function try(pat)
+                local s, e, a, b = expr:find(pat, pos)
+                if s == pos then return e, a, b end
+            end
+
+            while pos <= len do
+                -- lê sinal opcional
+                local sign = "+"
+                local c = expr:sub(pos, pos)
+                if c == "+" or c == "-" then
+                    sign = c
+                    pos = pos + 1
+                    if pos > len then break end
+                end
+
+                -- tenta casar padrões a partir de pos (não quebrar '-' interno)
+                local e, a, b
+
+                -- s*(num) com parênteses: a*(-30)
+                e, a, b = try("([%a]+)%*%((%-?%d+%.?%d*)%)")
+                if e then add(a, b, sign); pos = e + 1; goto continue end
+
+                -- s*num: a*-30, a*20
+                e, a, b = try("([%a]+)%*(%-?%d+%.?%d*)")
+                if e then add(a, b, sign); pos = e + 1; goto continue end
+
+                -- num*s: -30*a, 20*b
+                e, a, b = try("(%-?%d+%.?%d*)%*([%a]+)")
+                if e then add(b, a, sign); pos = e + 1; goto continue end
+
+                -- s<num>: b-6, c3.5
+                e, a, b = try("([%a]+)(%-?%d+%.?%d*)")
+                if e then add(a, b, sign); pos = e + 1; goto continue end
+
+                -- num s sem '*': 6b, -6c
+                e, a, b = try("(%-?%d+%.?%d*)([%a]+)")
+                if e then add(b, a, sign); pos = e + 1; goto continue end
+
+                -- s isolado: a, b, c
+                e, a = try("([%a]+)")
+                if e then add(a, "1", sign); pos = e + 1; goto continue end
+
+                -- caractere inesperado: evita loop infinito
+                pos = pos + 1
+                ::continue::
+            end
+
+            return coeffs
+        end
+
+         -- primeira linha simbólica (apenas rótulos)
+        local firstLine = {}
+        for j = 1, n do
+            firstLine[j] = string.char(96 + j) -- 'a','b','c',...
+        end
+
+        -- constrói matriz usando as LINHAS NUMÉRICAS (points), não os objetos Vector
+        local rows = { firstLine }
+        for i = 1, #vectors do
+            rows[#rows+1] = vectors[i].points
+        end
+        local M = MS.transformInMatrix(rows)
+        local det = M:ExtendDeterminant()
+
+        local coeffs = extractCoefficientsToVector(det, n)
+        return VectorSystem.transformInVector(coeffs)
     end,
+
     dot = function(v1, v2)
         local check, dim = v1:checkEquipollence(v2)
         if not check then error("those vectors is a not equipollents") end
@@ -71,6 +176,10 @@ local VectorProperties = {
         return d
     end,
     
+    __len = function(s)
+        return s.Dimensions
+    end,
+
     checkEquipollence = function(s, otherVector)
         if type(otherVector)~="table" then error(otherVector .. " is a not Vector") 
         elseif (not otherVector.Dimensions) and otherVector.type~="vector" then error(otherVector .. " is a not Vector")  end
