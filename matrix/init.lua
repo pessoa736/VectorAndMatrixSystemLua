@@ -5,14 +5,14 @@ local MatrixProperties = {
 
     getItem = function(m, row, col)
         if row < 1 or row > m.nrows or col < 1 or col > m.ncols then
-            error("index matrix limit out ")
+            error("matrix index out of bounds")
         end
         return m.data[row][col]
     end,
 
     modifyItem = function(m, row, col, value)
         if row < 1 or row > m.nrows or col < 1 or col > m.ncols then
-            error("index matrix limit out ")
+            error("matrix index out of bounds")
         end
 
         m.data[row][col] = value or 0
@@ -52,23 +52,23 @@ local MatrixProperties = {
     end,
 
     isCompatibleForMult = function(m1, m2)
-        if not MatrixSystem.isMatrix(m2) then error(m2 .. " not are matrix") end
+        if not MatrixSystem.isMatrix(m2) then error(tostring(m2) .. " is not a matrix") end
         return m1.ncols == m2.nrows 
     end,
 
     isCompatibleForSum = function(m1, m2)
-        if not MatrixSystem.isMatrix(m2) then error(m2 .. " not are matrix") end
+        if not MatrixSystem.isMatrix(m2) then error(tostring(m2) .. " is not a matrix") end
         return m1.ncols == m2.ncols and m1.nrows == m2.nrows 
     end,
 
     isSquare = function(m1)
-        if not MatrixSystem.isMatrix(m2) then error(m2 .. " not are matrix") end
+        if not MatrixSystem.isMatrix(m1) then error("provided value is not a matrix") end
         return m1.ncols == m1.nrows
     end,
 
     __add = function(m1, m2)
         if not m1:isCompatibleForSum(m2) then
-            error("As matrizes devem ter as mesmas dimensões para adição.")
+            error("Matrices must have the same dimensions for addition.")
         end
 
         m1:map(function(row, col, currentValue)
@@ -135,7 +135,6 @@ local MatrixProperties = {
             end
             local sa, sb = tostr(a), tostr(b)
 
-            -- simplificações com 1 e -1
             if isnum(a) and a == 1 then return sb end
             if isnum(b) and b == 1 then return sa end
             if isnum(a) and a == -1 then
@@ -171,7 +170,6 @@ local MatrixProperties = {
                 local sub = mm:submatrix(1, j)
                 local subdet = extDet(sub)
 
-                -- termo = sign * a1j * subdet (com simplificação numérica quando possível)
                 local term = mul(sign, mul(a1j, subdet))
 
                 if isnum(term) then
@@ -202,10 +200,18 @@ local MatrixProperties = {
 }
 
 MatrixProperties.__index = function(s, k)
-    if type(k) == "number" then
-        return s.data[k]
+    local t = type(k)
+    if t == "table" then
+        local r = (k[1]-1)%s.nrows + 1
+        local c = (k[2]-1)%s.ncols + 1
+        return s.data[r][c]
+    elseif  t == "number" then
+        local r = (k-1)%s.nrows + 1
+        local c = (k-1)%s.ncols + 1
+        return s.data[r][c]
+    else
+        return MatrixProperties[k]
     end
-    return MatrixProperties[k]
 end
 
 
@@ -230,7 +236,7 @@ function MatrixSystem.createMatriz(...)
         data = args,
         type = "matrix"
     }
-
+    
     return setmetatable(m, MatrixProperties)
 end
 
@@ -250,7 +256,7 @@ function MatrixSystem.transformInMatrix(t)
 end
 
 function MatrixSystem.isMatrix(m1)
-    if type(t)=="table" then
+    if type(m1)=="table" then
         return t.type == "matrix" 
     else
         return false

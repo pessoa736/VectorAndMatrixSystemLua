@@ -169,12 +169,13 @@ check("test Dot", false,
 
 check("test CrossNProduct", false,
     function()
-        local v1 = vs.CreateVector(3, -5, 3)
-        local v2 = vs.CreateVector(1, 5, 3)
+        local v1 = vs.CreateVector(3, -5, 0)
+        local v2 = vs.CreateVector(0, 5, 2)
 
-        local re  =  v1:CrossNProduct(v2)
         print(v1)
         print(v2)
+
+        local re  =  v1:CrossNProduct(v2)
         print(re)
     end
 )

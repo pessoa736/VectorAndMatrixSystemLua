@@ -10,7 +10,7 @@ local VectorProperties = {
 
     __add = function(v1, v2)
         local check, dim = v1:checkEquipollence(v2)
-        if not check then error("those vectors is a not equipollents") end
+        if not check then error("vectors are not equipollent") end
 
         return VectorSystem.transformInVector(
             function()
@@ -36,7 +36,7 @@ local VectorProperties = {
     end,
 
     __sub = function(v1, v2)
-        if not v1:checkEquipollence(v2) then error("those vectors is a not equipollents") end
+        if not v1:checkEquipollence(v2) then error("vectors are not equipollent") end
 
         return v1 + (-v2)
     end,
@@ -50,35 +50,27 @@ local VectorProperties = {
         return VectorSystem.transformInVector(vector)
     end,
 
-    -- CrossNProduct = function(...)
-    --     local vectors = {...}
-
-    --     local firstLine = {}
-    --     for i=1, #vectors+1 do
-    --         firstLine[i] = string.char(i)
-    --     end
-
-    --     local det = MS.createMatriz(firstLine, unpack(vectors)):ExtendDeterminant()
-
-    -- end,
-
-    CrossNProduct = function(...)
-        local vectors = {...}
-        if #vectors == 0 then error("esperado pelo menos 1 vetor") end
+    CrossNProduct = function(v1,...)
+        local vectors = {v1, ...}
+        if #vectors == 0 then error("expected at least one vector") end
 
         local n = vectors[1].Dimensions
+        
+        if n==3 or n==2 then
+            return v1:CrossProduct_2D_or_3D(...)
+        end
+        
         for i = 2, #vectors do
             local ok = vectors[1]:checkEquipollence(vectors[i])
-            if not ok then error("vetores não equipolentes") end
+            if not ok then error("vectors are not equipollent") end
         end
         if #vectors ~= n - 1 then
-            error("para produto vetorial em R^" .. n .. " são necessários " .. (n - 1) .. " vetores")
+            error("for cross product in R^" .. n .. " you need " .. (n - 1) .. " vectors")
         end
 
         local function extractCoefficientsToVector(expr, n)
             if type(expr) ~= "string" then expr = tostring(expr or "") end
 
-            -- remove espaços
             expr = expr:gsub("%s+", "")
             local len = #expr
             local pos = 1
@@ -102,7 +94,6 @@ local VectorProperties = {
             end
 
             while pos <= len do
-                -- lê sinal opcional
                 local sign = "+"
                 local c = expr:sub(pos, pos)
                 if c == "+" or c == "-" then
@@ -111,34 +102,26 @@ local VectorProperties = {
                     if pos > len then break end
                 end
 
-                -- tenta casar padrões a partir de pos (não quebrar '-' interno)
                 local e, a, b
 
-                -- s*(num) com parênteses: a*(-30)
                 e, a, b = try("([%a]+)%*%((%-?%d+%.?%d*)%)")
                 if e then add(a, b, sign); pos = e + 1; goto continue end
 
-                -- s*num: a*-30, a*20
                 e, a, b = try("([%a]+)%*(%-?%d+%.?%d*)")
                 if e then add(a, b, sign); pos = e + 1; goto continue end
 
-                -- num*s: -30*a, 20*b
                 e, a, b = try("(%-?%d+%.?%d*)%*([%a]+)")
                 if e then add(b, a, sign); pos = e + 1; goto continue end
 
-                -- s<num>: b-6, c3.5
                 e, a, b = try("([%a]+)(%-?%d+%.?%d*)")
                 if e then add(a, b, sign); pos = e + 1; goto continue end
 
-                -- num s sem '*': 6b, -6c
                 e, a, b = try("(%-?%d+%.?%d*)([%a]+)")
                 if e then add(b, a, sign); pos = e + 1; goto continue end
 
-                -- s isolado: a, b, c
                 e, a = try("([%a]+)")
                 if e then add(a, "1", sign); pos = e + 1; goto continue end
 
-                -- caractere inesperado: evita loop infinito
                 pos = pos + 1
                 ::continue::
             end
@@ -146,17 +129,17 @@ local VectorProperties = {
             return coeffs
         end
 
-         -- primeira linha simbólica (apenas rótulos)
+
         local firstLine = {}
         for j = 1, n do
-            firstLine[j] = string.char(96 + j) -- 'a','b','c',...
+            firstLine[j] = string.char(96 + j)
         end
 
-        -- constrói matriz usando as LINHAS NUMÉRICAS (points), não os objetos Vector
         local rows = { firstLine }
         for i = 1, #vectors do
             rows[#rows+1] = vectors[i].points
         end
+        
         local M = MS.transformInMatrix(rows)
         local det = M:ExtendDeterminant()
 
@@ -164,9 +147,70 @@ local VectorProperties = {
         return VectorSystem.transformInVector(coeffs)
     end,
 
+    CrossProduct_2D_or_3D = function(...)
+        local vectors = {...}
+        if #vectors == 0 then error("expected at least one vector") end
+
+        local n = vectors[1].Dimensions
+        
+        if n>3 then error("function does not support vectors with dimension > 3") end
+
+        for i = 2, #vectors do
+            local ok = vectors[1]:checkEquipollence(vectors[i])
+            if not ok then error("vectors are not equipollent") end
+        end
+        
+        if #vectors ~= n - 1 then
+            error("for cross product in R^" .. n .. " you need " .. (n - 1) .. " vectors")
+        end
+
+        
+        local firstLine = {}
+        for j = 1, n do
+            firstLine[j] = 1
+        end
+
+        local rows = { firstLine }
+        for i = 1, #vectors do
+            rows[#rows+1] = vectors[i].points
+        end
+
+
+        local Vec = {}
+        local M = MS.transformInMatrix(rows)
+        M:map(
+            function(i, j, C_value)
+                if i == 1 then
+                    local sum = 0
+                    local mult1, mult2 = 1, 1
+
+                    for k = 0, M.ncols-1 do
+                        local value1 = M[{i+k,j+k}]
+                        local value2 = M[{i+k,j-k}]
+                       
+                        if value2 ~= C_value then
+                            mult2 = mult2 * value2
+                        end 
+                       
+                        if value1 ~= C_value then
+                            mult1 = mult1 * value1
+                        end
+                    end
+
+                    sum = sum + mult1 - mult2
+                    print(sum)
+                    Vec[j] = sum
+                end
+                return value 
+            end
+        )
+
+        return VectorSystem.transformInVector(Vec)
+    end,
+
     dot = function(v1, v2)
         local check, dim = v1:checkEquipollence(v2)
-        if not check then error("those vectors is a not equipollents") end
+        if not check then error("vectors are not equipollent") end
 
         local d = 0
         for i=1, dim do
@@ -181,8 +225,8 @@ local VectorProperties = {
     end,
 
     checkEquipollence = function(s, otherVector)
-        if type(otherVector)~="table" then error(otherVector .. " is a not Vector") 
-        elseif (not otherVector.Dimensions) and otherVector.type~="vector" then error(otherVector .. " is a not Vector")  end
+        if type(otherVector)~="table" then error(otherVector .. " is not a vector") 
+        elseif (not otherVector.Dimensions) and otherVector.type~="vector" then error(otherVector .. " is not a vector")  end
 
         return s.Dimensions == otherVector.Dimensions, s.Dimensions
     end,
