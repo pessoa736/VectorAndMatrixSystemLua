@@ -205,7 +205,7 @@ local VectorProperties = {
                     sum = sum + mult1 - mult2
                     Vec[j] = sum
                 end
-                return value 
+                return C_value 
             end
         )
 

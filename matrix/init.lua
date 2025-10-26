@@ -257,7 +257,7 @@ end
 
 function MatrixSystem.isMatrix(m1)
     if type(m1)=="table" then
-        return t.type == "matrix" 
+        return m1.type == "matrix" 
     else
         return false
     end
