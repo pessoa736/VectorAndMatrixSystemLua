@@ -23,7 +23,7 @@ Requisitos: Lua >= 5.2
 ### Usando LuaRocks (instalação local a partir deste repositório)
 
 ```bash
-luarocks make rockspecs/VectorAndMatrixSystem.rockspec
+luarocks make rockspecs/vmsl-1.0-1.rockspec
 ```
 
 Depois, no seu código:
