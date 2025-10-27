@@ -8,6 +8,7 @@
 *.all.rock
 .luarocks/
 *.log
+*log.txt
 logs/
 coverage/
 

@@ -258,3 +258,4 @@ end)
 
 
 log.show()
+log.save(os.date())
