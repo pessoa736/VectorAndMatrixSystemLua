@@ -1,4 +1,6 @@
 
+if not log then log = require("loglua") end
+
 local MatrixSystem = {}
 
 local MatrixProperties = {
@@ -196,6 +198,9 @@ local MatrixProperties = {
         end
 
         return extDet(m1)
+    end,
+    __concat = function (m1, v)
+        return tostring(m1) .. tostring(v)
     end
 }
 

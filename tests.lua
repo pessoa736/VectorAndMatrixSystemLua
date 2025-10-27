@@ -2,37 +2,56 @@ package.path = package.path .. ";./?/init.lua"
 
 local vs = require("vectors")
 local ms = require("matrix")
-
+local log = require("loglua")
 
 local numTest = 0
-function check(desc, shouldError, fn)
+local function check(desc, shouldError, fn)
+    
     numTest = numTest + 1
-    print( "\n\n(" .. numTest .. ")" )
-    print( (shouldError and " -- " or " ++ ") .. desc .. ":")
+    log()
+    log()
+    log()
+    log( "(" .. numTest .. ")" )
+    
+    if shouldError then
+        log( " -- " .. desc .. ":")
+    else
+        log(" ++ " .. desc .. ": ")
+    end
+
     local status, err = pcall(fn)
-    if err then print("\t".. err) end
-    print("(".. numTest .. ")" .. ((status ~= shouldError) and "(CORRECT)" or "(THIS IS NOT CORRECT)"))
-    print("\n")
+    
+    if err then log(err) end
+
+    if shouldError ~= status then 
+        log("(".. numTest .. ")" .. "(CORRECT)")
+    else
+        log.error( "(" .. numTest .. ")" .. "(THIS IS NOT CORRECT)")    
+    end
+    log()
 end
 
 
-print("note:\n\t '--' -> means it is supposed to throw an error \n\t '++' -> means it should NOT throw an error ")
-
-print("\n\ntests:")
+log("note: ")
+log("\t'--' -> means it is supposed to throw an error")
+log("\t'++' -> means it should NOT throw an error ")
+log()
+log("tests:")
 
 -- helper to print each operation performed inside tests
 local function op(desc, fn)
-    print(" > " .. desc )
+    log(" > " .. desc )
+    log()
     if fn then
         local result = fn()
         if result ~= nil then
             local t = type(result)
             if t == "table" and result.type == "vector" then
-                print(" result: " .. tostring(result))
+                log(" result: " .. tostring(result))
             elseif t == "table" and result.type == "matrix" then
-                print(" result:\n\n" .. tostring(result))
+                log(" result: \n\n" .. tostring(result))
             else
-                print(" result: " .. tostring(result))
+                log(" result: " .. tostring(result))
             end
         end
         return result
@@ -236,3 +255,6 @@ end)
 check("transformInMatrix must fail on invalid type", true, function()
     op("ms.transformInMatrix(42)", function() return ms.transformInMatrix(42) end)
 end)
+
+
+log.show()
