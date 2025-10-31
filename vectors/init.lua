@@ -11,13 +11,9 @@ local VectorProperties = {
         local check, dim = v1:checkEquipollence(v2)
         if not check then error("vectors are not equipollent") end
 
-        return VectorSystem.transformInVector(
-            function()
-                local sum = {}
-                for i= 1, dim do
-                    sum[i] = v1[i] + v2[i]
-                end
-                return sum
+        return v1:map(
+            function(dim, currentValue)
+                return currentValue + v2[dim]
             end
         )
     end,

@@ -1,6 +1,6 @@
 package.path = package.path .. ";./?/init.lua"
 
-local vs = require("vectors")
+local vs = require("vectors.core")
 local ms = require("matrix")
 local log = require("loglua")
 
@@ -258,4 +258,4 @@ end)
 
 
 log.show()
-log.save(os.date())
+log.save()
