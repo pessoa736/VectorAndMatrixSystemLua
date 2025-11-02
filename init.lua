@@ -1,6 +1,6 @@
 package.path = package.path .. ";./?/init.lua"
 
-local V = require "vectors"
+local V = require "vectors.core"
 local M = require "matrix"
 
 return {
