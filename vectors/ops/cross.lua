@@ -3,7 +3,7 @@
 return function(VectorSystem)
     local ops = {}
 
-    function ops.CrossNProduct(v1,...)
+    function ops.Cross(v1,...)
         local vectors = {v1, ...}
         if #vectors == 0 then error("expected at least one vector") end
 

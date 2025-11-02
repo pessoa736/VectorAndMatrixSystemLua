@@ -46,9 +46,9 @@ function AssemblerCreate(VectorProperties)
 
     function Assembler.IsVector(t)
         if type(t)=="table" then
-            return t.type == "vector" 
+            return t.type == "vector" , "vector";
         else
-            return false
+            return false, type(t);
         end
     end
 

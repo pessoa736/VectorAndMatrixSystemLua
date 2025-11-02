@@ -3,7 +3,7 @@ return function (VectorSystem)
     local ops = {}
     
     function ops.__add(v1, v2)
-        local check, dim = v1:checkEquipollence(v2)
+        local check = v1:checkEquipollence(v2)
         if not check then error("vectors are not equipollent") end
 
         return v1:map(
@@ -14,7 +14,7 @@ return function (VectorSystem)
     end
 
     function ops.__unm(v1)
-        v1:map(
+        return v1:map(
             function(_, currentValue)
                 return -currentValue 
             end
@@ -41,26 +41,13 @@ return function (VectorSystem)
             fun(i, s[i])
         end
     end
-
-    ops.dot = function(v1, v2)
-        local check, dim = v1:checkEquipollence(v2)
-        if not check then error("vectors are not equipollent") end
-
-        local d = 0
-        for i=1, dim do
-            d = d + v1[i]*v2[i] 
-        end
-
-        return d
-    end
     
     ops.__len = function(s)
         return s.Dimensions
     end
 
     ops.checkEquipollence = function(s, otherVector)
-        if type(otherVector)~="table" then error(otherVector .. " is not a vector") 
-        elseif (not otherVector.Dimensions) and otherVector.type~="vector" then error(otherVector .. " is not a vector")  end
+        if not VectorSystem.IsVector(otherVector) then error(otherVector .. " is not a vector") end
 
         return s.Dimensions == otherVector.Dimensions, s.Dimensions
     end
@@ -86,7 +73,20 @@ return function (VectorSystem)
     end
 
     ops.__mul = function (v1, v2)
-        return ops.dot(v1, v2)
+
+        local is1 = VectorSystem.IsVector(v1)
+        local is2 = VectorSystem.IsVector(v2)
+        
+        if is1 and is2 then
+            return v1:Dot(v2)
+        
+        elseif (type(v2) == "number" and is1)  then
+            return v1:map(function(_, v) return v * v2 end)
+        elseif (type(v1) =="number" and is2) then
+            return v2:map(function(_, v) return v * v1 end)
+        else
+            error("It is not possible to multiply a vector by ".. type(v2))
+        end
     end
 
     return ops
