@@ -1,6 +1,8 @@
 
 
 return function(VectorSystem)
+    local Mat = require("matrix").transformInMatrix
+    local transfInVec = VectorSystem.transformInVector
     local ops = {}
 
     function ops.Cross(v1,...)
@@ -29,14 +31,14 @@ return function(VectorSystem)
 
         local rows = { firstLine }
         for i = 1, #vectors do
-            rows[#rows+1] = vectors[i].points
+            rows[i+1] = vectors[i].points
         end
         
-        local M = require("matrix").transformInMatrix(rows)
+        local M = Mat(rows)
         local det = M:ExtendDeterminant()
 
         local coeffs = require("vectors.utils.parseCoefficients")(det, n)
-        return VectorSystem.transformInVector(coeffs)
+        return transfInVec(coeffs)
     end
 
 
@@ -45,18 +47,19 @@ return function(VectorSystem)
     
     function ops.CrossProduct_2D_or_3D(...)
         local vectors = {...}
+        local Nvectors = #vectors
         if #vectors == 0 then error("expected at least one vector") end
 
         local n = vectors[1].Dimensions
         
         if n>3 then error("function does not support vectors with dimension > 3") end
 
-        for i = 2, #vectors do
+        for i = 2, Nvectors do
             local ok = vectors[1]:checkEquipollence(vectors[i])
             if not ok then error("vectors are not equipollent") end
         end
         
-        if #vectors ~= n - 1 then
+        if Nvectors ~= n - 1 then
             error("for cross product in R^" .. n .. " you need " .. (n - 1) .. " vectors")
         end
 
@@ -67,13 +70,13 @@ return function(VectorSystem)
         end
 
         local rows = { firstLine }
-        for i = 1, #vectors do
-            rows[#rows+1] = vectors[i].points
+        for i = 1, Nvectors do
+            rows[i+1] = vectors[i].points
         end
 
 
         local Vec = {}
-        local M = require("matrix").transformInMatrix(rows)
+        local M = Mat(rows)
         M:map(
             function(i, j, C_value)
                 if i == 1 then
@@ -100,7 +103,7 @@ return function(VectorSystem)
             end
         )
 
-        return VectorSystem.transformInVector(Vec)
+        return transfInVec(Vec)
     end
     return ops
 end

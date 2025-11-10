@@ -1,8 +1,10 @@
 
 if not log then log = require("loglua") end
 
-local MatrixSystem = {}
+local ut = require("matrix.mathUtils")
+local extDet = ut.extDet
 
+local MatrixSystem = {}
 local MatrixProperties = {
 
     getItem = function(m, row, col)
@@ -98,104 +100,39 @@ local MatrixProperties = {
         return sub
     end,
 
-    determinant = function (m1)
-        local m = m1.data
+    determinant = function (selfMatrix)
+        local m = selfMatrix.data
         local n = #m
 
-        if n == 1 then 
-            return 
-                m[1][1] 
+        local m1 = m[1]
+        local m2 = m[2]
+        local m3 = m[3]
+
+        if n == 1 then
+            return
+                m1[1]
         end
         if n == 2 then 
             return 
-                m[1][1] * m[2][2] - 
-                m[1][2] * m[2][1] 
+                m1[1] * m2[2] -
+                m1[2] * m2[1]
         end
         if n == 3 then return 
-            m[1][1] * (m[2][2]*m[3][3] - m[2][3]*m[3][2]) + 
-            m[1][2] * (m[2][3]*m[3][1] - m[2][1]*m[3][3]) + 
-            m[1][3] * (m[2][1]*m[3][2] - m[2][2]*m[3][1])
+            m1[1] * (m2[2]*m3[3] - m2[3]*m3[2]) +
+            m1[2] * (m2[3]*m3[1] - m2[1]*m3[3]) +
+            m1[3] * (m2[1]*m3[2] - m2[2]*m3[1])
         end
         
         local det = 0
         for j = 1, n do
             local sign = ((j % 2 == 0) and -1 or 1)
-            local sub = m1:submatrix(1, j)
-            det = det + sign * m[1][j] * sub:determinant()
+            local sub = selfMatrix:submatrix(1, j)
+            det = det + sign * m1[j] * sub:determinant()
         end
 
         return det
     end,
     ExtendDeterminant = function(m1)
-        local function isnum(x) return type(x) == "number" end
-        local function tostr(x) return tostring(x) end
-        local function needParens(s) return s:find("[%+%-]") ~= nil end
-
-        local function mul(a, b)
-            if isnum(a) and isnum(b) then
-                return a * b
-            end
-            local sa, sb = tostr(a), tostr(b)
-
-            if isnum(a) and a == 1 then return sb end
-            if isnum(b) and b == 1 then return sa end
-            if isnum(a) and a == -1 then
-                if sb:sub(1,1) == "-" then return sb:sub(2) end
-                if needParens(sb) then sb = "(" .. sb .. ")" end
-                return "-" .. sb
-            end
-            if isnum(b) and b == -1 then
-                if sa:sub(1,1) == "-" then return sa:sub(2) end
-                if needParens(sa) then sa = "(" .. sa .. ")" end
-                return "-" .. sa
-            end
-
-            if not isnum(a) and needParens(sa) then sa = "(" .. sa .. ")" end
-            if not isnum(b) and needParens(sb) then sb = "(" .. sb .. ")" end
-            return sa .. "*" .. sb
-        end
-
-        local function extDet(mm)
-            local m = mm.data
-            local n = #m
-
-            if n == 1 then
-                return m[1][1]
-            end
-
-            local numericSum = 0
-            local parts = {}
-
-            for j = 1, n do
-                local sign = ((j % 2 == 0) and -1 or 1)
-                local a1j = m[1][j]
-                local sub = mm:submatrix(1, j)
-                local subdet = extDet(sub)
-
-                local term = mul(sign, mul(a1j, subdet))
-
-                if isnum(term) then
-                    numericSum = numericSum + term
-                else
-                    parts[#parts+1] = term
-                end
-            end
-
-            if #parts == 0 then
-                return numericSum
-            else
-                local expr = ""
-                if numericSum ~= 0 then expr = tostr(numericSum) end
-                for _, p in ipairs(parts) do
-                    if p:sub(1,1) == "-" then
-                        expr = (expr == "") and p or (expr .. " " .. p)
-                    else
-                        expr = (expr == "") and p or (expr .. " + " .. p)
-                    end
-                end
-                return expr
-            end
-        end
 
         return extDet(m1)
     end,
