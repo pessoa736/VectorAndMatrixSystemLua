@@ -12,8 +12,8 @@ test.setStart()
 
 local vres
 local v1, v2
-v1 = vs.CreateVector(1, 2, 3)
-v2 = vs.CreateVector(3, 2, 1)
+v1 = vs.CreateVector(1, 2, 4,5,6, 3)
+v2 = vs.CreateVector(3, 2,4,5,6, 3)
 
 vres = v1:projection(v2)
 

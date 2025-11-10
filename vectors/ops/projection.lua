@@ -1,7 +1,7 @@
 
 
 return function(VectorSystem)
-    local ISV = VectorSystem
+    local ISV = VectorSystem.IsVector
     local ops = {}
 
     ops.projection = function(v1, v2)
@@ -10,7 +10,7 @@ return function(VectorSystem)
         
         local size 
         if IS1 and IS2 then size = ((v2 * v1)/(v1 * v1)) end
-        
+
         local IS3 = ISV(size)
         if IS3 then error("unexpected error") end
 
