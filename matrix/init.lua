@@ -186,14 +186,6 @@ end
 
 
 function MatrixSystem.transformInMatrix(t)
-    if type(t)=="table" then
-        return MatrixSystem.createMatriz(table.unpack(t)) 
-        
-    elseif type(t)=="function" then  
-        return MatrixSystem.createMatriz(table.unpack(t())) 
-    else
-        error("expected a table or function in this function")
-    end
     
 end
 
