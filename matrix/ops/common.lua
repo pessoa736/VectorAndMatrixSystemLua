@@ -41,7 +41,7 @@ return function(MatrixSystem)
         elseif isMA and  isMB then
             
             -- Multiplicação de matrizes
-            if a.ncols ~= b.nrows then
+            if not a:isCompatibleForMult(b) then
                 error("Dimensões incompatíveis para multiplicação de matrizes. Matriz A tem " .. a.ncols .. " colunas, mas matriz B tem " .. b.nrows .. " linhas.")
             end
 
@@ -55,6 +55,20 @@ return function(MatrixSystem)
         else
             error("Operação de multiplicação não suportada entre os tipos fornecidos.")
         end
+    end
+
+    ops.__tostring = function(m)
+        local s = ""
+
+        for i = 1, m.nrows do
+            s = s .. "| "
+            for j = 1, m.ncols do
+                s = s .. m[{i,j}] .. "\t"
+            end
+            s = s .. "|\n"
+        end
+
+        return s
     end
 
     return ops
