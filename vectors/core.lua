@@ -5,7 +5,7 @@ local VectorSystem = require("vectors.vectorAssembler")(properties)
 
 local function addProperties(prop)
     for k, v in pairs(prop(VectorSystem)) do
-        properties[k] = v 
+        properties[k] = v
     end
     
 end

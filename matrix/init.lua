@@ -38,49 +38,8 @@ local MatrixProperties = {
         return s
     end,
 
-    map = function(m, funct)
-        if type(funct) == "function" then        
-            for row = 1, m.nrows do
-                for col = 1, m.ncols do
-                    
-                    local currentValue = m.data[row][col]                        
-                    m.data[row][col] = funct(row, col, currentValue)
 
-                end
-            end
-        else 
-            error("expected a function")
-        end
-
-        return m
-    end,
-
-    isCompatibleForMult = function(m1, m2)
-        if not MatrixSystem.isMatrix(m2) then error(tostring(m2) .. " is not a matrix") end
-        return m1.ncols == m2.nrows 
-    end,
-
-    isCompatibleForSum = function(m1, m2)
-        if not MatrixSystem.isMatrix(m2) then error(tostring(m2) .. " is not a matrix") end
-        return m1.ncols == m2.ncols and m1.nrows == m2.nrows 
-    end,
-
-    isSquare = function(m1)
-        if not MatrixSystem.isMatrix(m1) then error("provided value is not a matrix") end
-        return m1.ncols == m1.nrows
-    end,
-
-    __add = function(m1, m2)
-        if not m1:isCompatibleForSum(m2) then
-            error("Matrices must have the same dimensions for addition.")
-        end
-
-        m1:map(function(row, col, currentValue)
-            return currentValue + m2:getItem(row, col)
-        end)
-
-        return m1
-    end,
+    
 
     submatrix = function(m1, row, col)
         local m = m1.data
@@ -141,61 +100,13 @@ local MatrixProperties = {
     end
 }
 
-MatrixProperties.__index = function(s, k)
-    local t = type(k)
-    if t == "table" then
-        local r = (k[1]-1)%s.nrows + 1
-        local c = (k[2]-1)%s.ncols + 1
-        return s.data[r][c]
-    elseif  t == "number" then
-        local r = (k-1)%s.nrows + 1
-        local c = (k-1)%s.ncols + 1
-        return s.data[r][c]
-    else
-        return MatrixProperties[k]
-    end
-end
 
 
 
 
-function MatrixSystem.createMatriz(...)
-    local args = {...}
-
-    if #args == 0 then error("there is no matrix 0x0") end
-
-    local errors = ""
-    for k, v in ipairs(args) do
-        if type(v) ~= "table" then 
-            errors = errors  .. k ..  (k == #args and "" or (k == #args - 1 and " and " or ", "))
-        end
-    end
-    if #errors > 0 then error("the lines " .. errors .. " are not lines") end
-
-    local m = {
-        nrows = #args,
-        ncols = #args[1],
-        data = args,
-        type = "matrix"
-    }
-    
-    return setmetatable(m, MatrixProperties)
-end
 
 
 
-
-function MatrixSystem.transformInMatrix(t)
-    
-end
-
-function MatrixSystem.isMatrix(m1)
-    if type(m1)=="table" then
-        return m1.type == "matrix" 
-    else
-        return false
-    end
-end
 
 return MatrixSystem;
 

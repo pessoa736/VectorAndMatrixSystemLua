@@ -25,15 +25,15 @@ local function Assembler(MatrixPropieties)
         type = "matrix"
     }
     
-    return setmetatable(m, MatrixProperties)
+    return setmetatable(m, MatrixPropieties)
   end
   
   function Matrix.TransformInMatrix(t)
     if type(t)=="table" then
-        return Matrix.createMatriz(unpack(t)) 
+        return Matrix.CreateMatrix(unpack(t)) 
         
     elseif type(t)=="function" then  
-        return Matrix.createMatriz(unpack(t())) 
+        return Matrix.CreateMatrix(unpack(t())) 
     else
         error("expected a table or function in this function")
     end
@@ -41,11 +41,13 @@ local function Assembler(MatrixPropieties)
   
   function Matrix.IsMatrix(m1)
     if type(m1)=="table" then
-        return m1.type == "matrix" 
+        return m1.type == "matrix", "matrix"
     else
-        return false
+        return false, type(m1)
     end
   end
+
+  return Matrix
 end
 
 
