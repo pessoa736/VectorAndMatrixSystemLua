@@ -2,6 +2,7 @@ local initTime = 0
 local finalTime = 0
 local dt = 0
 
+
 return {
     setStart = function ()
         initTime = os.clock()
@@ -11,7 +12,7 @@ return {
     end,
     showtime = function()
         dt = finalTime - initTime; 
-
+        
         if dt/60 >= 1 and dt/60<60 then
             return dt .. "min"
         end

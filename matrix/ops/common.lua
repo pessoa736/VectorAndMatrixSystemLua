@@ -8,11 +8,8 @@ return function(MatrixSystem)
             error("Matrices must have the same dimensions for addition.")
         end
 
-
         -- percorre toda a matrix e soma cada item da mesma posição da outra matrix
-        m1:map(function(row, col, currentValue) return currentValue + m2[{row, col}] end)
-
-        return m1
+        return m1:map(function(row, col, currentValue) return currentValue + m2[{row, col}] end)
     end
 
     -- subtração
@@ -20,11 +17,8 @@ return function(MatrixSystem)
         if not m1:isCompatibleForSum(m2) then
             error("Matrices must have the same dimensions for addition.")
         end
-
         -- percorre toda a matrix e soma cada item da mesma posição da outra matrix
-        m1:map(function(row, col, currentValue) return currentValue - m2[{row, col}] end)
-
-        return m1
+        return m1:map(function(row, col, currentValue) return currentValue - m2[{row, col}] end)
     end
 
     -- Multiplicação
@@ -69,6 +63,10 @@ return function(MatrixSystem)
         end
 
         return s
+    end
+    
+    ops.__concat = function (m1, v)
+        return tostring(m1) .. tostring(v)
     end
 
     return ops

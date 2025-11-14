@@ -41,23 +41,7 @@ local MatrixProperties = {
 
     
 
-    submatrix = function(m1, row, col)
-        local m = m1.data
-        local sub = {}
-        for i = 1, #m do
-            if i ~= row then
-                local new_row = {}
-                for j = 1, #m[i] do
-                    if j ~= col then
-                        table.insert(new_row, m[i][j])
-                    end
-                end
-                table.insert(sub, new_row)
-            end
-        end
-        sub = MatrixSystem.transformInMatrix(sub)
-        return sub
-    end,
+    
 
     determinant = function (selfMatrix)
         local m = selfMatrix.data
@@ -95,9 +79,7 @@ local MatrixProperties = {
 
         return extDet(m1)
     end,
-    __concat = function (m1, v)
-        return tostring(m1) .. tostring(v)
-    end
+    
 }
 
 
