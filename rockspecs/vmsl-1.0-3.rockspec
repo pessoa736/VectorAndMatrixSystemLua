@@ -16,13 +16,12 @@ description = {
    license = "MIT"
 }
 dependencies = {
-   "lua >= 5.2"
+   "lua >= 5.4"
 }
 build = {
    type = "builtin",
    modules = {
-      VMSL = "init.lua",
-      matrix = "matrix/init.lua",
-      vectors = "vectors/init.lua"
+      matrix = "matrix/core.lua",
+      vectors = "vectors/core.lua"
    }
 }

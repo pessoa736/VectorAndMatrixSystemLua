@@ -1,10 +1,9 @@
 
 os.execute("clear")
 
-local initTime, finalTime
 local ms = require("matrix.core")
 local log = require("loglua")
-local test = require("vectors.tests.TestFunctions")
+local test = require("matrix.tests.TestFunctions")
 
 -- criação das matrizes
 local matrix1 = ms.CreateMatrix(

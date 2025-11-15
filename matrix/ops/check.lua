@@ -18,5 +18,6 @@ return function(MatrixSystem)
         return m1.ncols == m1.nrows
     end
 
+
     return ops
 end

@@ -20,13 +20,14 @@ end
 Properties.__newindex = function(s, k, v)
     local t = type(k)
     if t == "table" then
-        local r = (k[1]-1)%s.nrows + 1
-        local c = (k[2]-1)%s.ncols + 1
+        local r = k[1]
+        local c = k[2]
+
+        if not type(s.data[r]) == "table" then s.data[r]={} end
         s.data[r][c] = v
     elseif t == "number" then
-        local r = (k-1)%s.nrows + 1
-        local c = (k-1)%s.ncols + 1
-        s.data[r][c] = v
+        if not type(s.data[k]) == "table" then s.data[k]={} end
+        s.data[k][k] = v
     else
         rawset(s, k, v)
     end

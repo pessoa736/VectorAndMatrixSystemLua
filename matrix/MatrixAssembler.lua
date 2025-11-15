@@ -38,7 +38,38 @@ local function Assembler(MatrixPropieties)
         error("expected a table or function in this function")
     end
   end
-  
+
+
+
+  function Matrix.CreateColumnMatrix(...)
+    local itens = {...}
+    local m = {}
+    for i=1, #itens do
+      m[i]={}
+      m[i][1] = itens[i]
+    end 
+
+    return Matrix.TransformInMatrix(m)
+  end
+
+  function Matrix.CreateRowMatrix(...)
+    local m = {[1]={...}}
+
+    return Matrix.TransformInMatrix(m)
+  end
+
+  function Matrix.CreateNullMatrix(NumRows, NumCols)
+    local m = {}
+    for i = 1, NumRows do
+      m[i]={}
+      for j = 1, NumCols do
+        m[i][j] = 0
+      end
+    end
+    return Matrix.TransformInMatrix(m)
+  end
+
+
   function Matrix.IsMatrix(m1)
     if type(m1)=="table" then
         return m1.type == "matrix", "matrix"

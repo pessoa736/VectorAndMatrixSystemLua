@@ -38,8 +38,8 @@ return function(MatrixSystem)
             if not a:isCompatibleForMult(b) then
                 error("Dimensões incompatíveis para multiplicação de matrizes. Matriz A tem " .. a.ncols .. " colunas, mas matriz B tem " .. b.nrows .. " linhas.")
             end
-
-            return a:map(function(i, j, currentValue)
+            local m = MatrixSystem.CreateNullMatrix(b.ncols, a.nrows)
+            return m:map(function(i, j, currentValue)
                 local sum = 0
                 for k = 1, a.ncols do
                     sum = sum + a[{i,k}] * b[{k,j}]

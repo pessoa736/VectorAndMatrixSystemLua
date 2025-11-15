@@ -8,11 +8,7 @@ local test = require("matrix.tests.TestFunctions")
 
 test.setStart()
 -- criação das matrizes
-local matrix1 = ms.CreateMatrix(
-    {1, 2, 3},
-    {2, 5, 6},
-    {3, 6, 9}
-)
+local matrix1 = ms.CreateNullMatrix(2, 4)
 
 test.setFinal()
 
