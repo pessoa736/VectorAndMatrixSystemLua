@@ -51,5 +51,6 @@ addProperties(require("matrix.ops.map"))
 addProperties(require("matrix.ops.common"))
 addProperties(require("matrix.ops.check"))
 addProperties(require("matrix.ops.submatrix"))
+addProperties(require("matrix.ops.determinat"))
 
 return MatrixSystem
