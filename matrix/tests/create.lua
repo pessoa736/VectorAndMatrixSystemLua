@@ -9,9 +9,10 @@ local test = require("matrix.tests.TestFunctions")
 test.setStart()
 -- criação das matrizes
 local matrix1 = ms.CreateMatrix(
-    {1, 2, 3},
-    {2, 5, 6},
-    {3, 6, 9}
+    3,3,
+    1, 2, 3,
+    2, 5, 6,
+    3, 6, 9
 )
 
 test.setFinal()

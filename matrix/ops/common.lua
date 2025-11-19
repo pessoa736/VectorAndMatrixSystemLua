@@ -57,7 +57,7 @@ return function(MatrixSystem)
         for i = 1, m.nrows do
             s = s .. "| "
             for j = 1, m.ncols do
-                s = s .. m[{i,j}] .. "\t"
+                s = s .. tostring(m[{i,j}]) .. "\t"
             end
             s = s .. "|\n"
         end

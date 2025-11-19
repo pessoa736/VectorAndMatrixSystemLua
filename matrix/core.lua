@@ -6,13 +6,11 @@ Properties.__index = function(s, k)
     if t == "table" then
         local r = (k[1]-1)%s.nrows + 1
         local c = (k[2]-1)%s.ncols + 1
-        return s.data[r][c]
+        return s.data[r+s.nrows*(c-1)]
     elseif  t == "number" then
-        local r = (k-1)%s.nrows + 1
-        local c = (k-1)%s.ncols + 1
-        return s.data[r][c]
+        return s.data[k]
     else
-        return Properties[k]
+        rawget(Properties, k)
     end
 end
 
@@ -22,23 +20,20 @@ Properties.__newindex = function(s, k, v)
     if t == "table" then
         local r = k[1]
         local c = k[2]
-
-        if not type(s.data[r]) == "table" then s.data[r]={} end
-        s.data[r][c] = v
+       s.data[r+s.nrows*c] = v
     elseif t == "number" then
-        if not type(s.data[k]) == "table" then s.data[k]={} end
-        s.data[k][k] = v
+        s.data[k] = v
     else
-        rawset(s, k, v)
+        rawset(Properties, k, v)
     end
 end
 
 -- Forward declaration so addProperties can capture it as an upvalue
-local MatrixSystem
+--local MatrixSystem
 
 local function addProperties(prop)
     for k, v in pairs(prop(MatrixSystem)) do
-        Properties[k] = v
+        rawset(Properties, k, v)
     end
 end
 
