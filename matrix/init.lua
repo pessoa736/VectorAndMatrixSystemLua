@@ -5,22 +5,6 @@ if not log then log = require("loglua") end
 local MatrixSystem = {}
 local MatrixProperties = {
 
-    getItem = function(m, row, col)
-        if row < 1 or row > m.nrows or col < 1 or col > m.ncols then
-            error("matrix index out of bounds")
-        end
-        return m.data[row][col]
-    end,
-
-    modifyItem = function(m, row, col, value)
-        if row < 1 or row > m.nrows or col < 1 or col > m.ncols then
-            error("matrix index out of bounds")
-        end
-
-        m.data[row][col] = value or 0
-
-        return m
-    end,
 
     __tostring = function(m)
         local s = ""

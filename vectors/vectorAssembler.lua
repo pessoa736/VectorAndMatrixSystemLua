@@ -29,21 +29,6 @@ function AssemblerCreate(VectorProperties)
         return Vector
     end
 
-
-
-    function Assembler.transformInVector(t)
-        if type(t)=="table" then
-            return Assembler.CreateVector(table.unpack(t)) 
-            
-        elseif type(t)=="function" then  
-            return Assembler.CreateVector(table.unpack(t())) 
-        else
-            error("expected a table or function in this function")
-        end
-        
-    end
-
-
     function Assembler.IsVector(t)
         if type(t)=="table" then
             return t.type == "vector" , "vector";
