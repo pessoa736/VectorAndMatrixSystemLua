@@ -47,5 +47,6 @@ addProperties(require("matrix.ops.common"))
 addProperties(require("matrix.ops.check"))
 addProperties(require("matrix.ops.submatrix"))
 addProperties(require("matrix.ops.determinat"))
+addProperties(require("matrix.ops.translation"))
 
 return MatrixSystem
