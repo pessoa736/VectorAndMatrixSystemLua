@@ -2,7 +2,6 @@
 
 os.execute("clear")
 
-local initTime, finalTime
 local vs = require("vectors.core")
 local log = require("loglua")
 local test = require("vectors.tests.TestFunctions")

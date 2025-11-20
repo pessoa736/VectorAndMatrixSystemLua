@@ -6,17 +6,18 @@ local log = require("loglua")
 local test = require("matrix.tests.TestFunctions")
 
 -- criação das matrizes
-local matrix1 = ms.CreateMatrix(
-    {1, 2, 3},
-    {2, 5, 6},
-    {3, 6, 9}
+local matrix1 = ms.CreateMatrix(3,3).data(
+    1, 2, 3,
+    2, 5, 6,
+    3, 6, 9
 )
 
-local matrix2 = ms.CreateMatrix(
-    {1, 2, 3},
-    {2, 0, 6},
-    {3, 6, 9}
+local matrix2 = ms.CreateMatrix(3,3).data(
+    1, 2, 3,
+    2, 0, 6,
+    3, 6, 9
 )
+
 log("matrix1: \n", matrix1)
 log("matrix2: \n", matrix2)
 

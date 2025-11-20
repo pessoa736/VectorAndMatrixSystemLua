@@ -4,13 +4,13 @@ local Properties = {}
 Properties.__index = function(s, k)
     local t = type(k)
     if t == "table" then
-        local r = (k[1]-1)%s.nrows + 1
-        local c = (k[2]-1)%s.ncols + 1
-        return s.data[r+s.nrows*(c-1)]
+        local r = ((k[1] or k.i)-1)%s.nrows + 1
+        local c = ((k[2] or k.j)-1)%s.ncols + 1
+        return s.data[(r-1)*s.ncols + c]
     elseif  t == "number" then
         return s.data[k]
     else
-        rawget(Properties, k)
+        return Properties[k]
     end
 end
 
@@ -18,9 +18,9 @@ end
 Properties.__newindex = function(s, k, v)
     local t = type(k)
     if t == "table" then
-        local r = k[1]
-        local c = k[2]
-       s.data[r+s.nrows*c] = v
+        local r = k[1] or k.i
+        local c = k[2] or k.j
+       s.data[(r-1)*s.ncols + c] = v
     elseif t == "number" then
         s.data[k] = v
     else

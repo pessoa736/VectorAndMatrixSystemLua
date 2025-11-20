@@ -9,7 +9,7 @@ return function(MatrixSystem)
         end
 
         -- percorre toda a matrix e soma cada item da mesma posição da outra matrix
-        return m1:map(function(row, col, currentValue) return currentValue + m2[{row, col}] end)
+        return m1:map(function(pos, currentValue) return currentValue + m2[pos] end)
     end
 
     -- subtração
@@ -18,7 +18,7 @@ return function(MatrixSystem)
             error("Matrices must have the same dimensions for addition.")
         end
         -- percorre toda a matrix e soma cada item da mesma posição da outra matrix
-        return m1:map(function(row, col, currentValue) return currentValue - m2[{row, col}] end)
+        return m1:map(function(pos, currentValue) return currentValue - m2[pos] end)
     end
 
     -- Multiplicação
@@ -27,10 +27,10 @@ return function(MatrixSystem)
         local isMB, tyB = MatrixSystem.IsMatrix(b)
 
         if tyA == "number" and isMB then
-            return b:map(function (i, j, currentValue) return a * currentValue end) 
+            return b:map(function (_, currentValue) return a * currentValue end) 
 
         elseif tyB == "number" and isMA then
-            return a:map(function (i, j, currentValue) return b * currentValue end) 
+            return a:map(function (_, currentValue) return b * currentValue end) 
 
         elseif isMA and  isMB then
             
@@ -38,14 +38,19 @@ return function(MatrixSystem)
             if not a:isCompatibleForMult(b) then
                 error("Dimensões incompatíveis para multiplicação de matrizes. Matriz A tem " .. a.ncols .. " colunas, mas matriz B tem " .. b.nrows .. " linhas.")
             end
-            local m = MatrixSystem.CreateNullMatrix(b.ncols, a.nrows)
-            return m:map(function(i, j, currentValue)
-                local sum = 0
-                for k = 1, a.ncols do
-                    sum = sum + a[{i,k}] * b[{k,j}]
-                end
-                return sum
-            end)
+
+            return MatrixSystem
+                .CreateMatrix(b.ncols, a.nrows)
+                :map(
+                    function(pos)
+                        local sum = 0
+                        for k = 1, a.ncols do
+                            sum = sum + a[{pos.i, k}] * b[{k, pos.j}]
+                        end
+
+                        return sum
+                    end
+                )
         else
             error("Operação de multiplicação não suportada entre os tipos fornecidos.")
         end

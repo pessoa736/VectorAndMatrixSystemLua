@@ -6,46 +6,44 @@ local unpack = table.unpack
 local function Assembler(MatrixPropieties)
   local Matrix = {}
   
-  function Matrix.CreateMatrix(nr, nc, ...)
-    local args = {...}
-    if type(args[1])== "table" then args=args[1] end
-    local n = #args
+  function Matrix.CreateMatrix(nr, nc)
 
-    if n == 0 then error("there are not matrix 0x0") end
-    --for k, s in ipairs(args) do print(k, s) end
+    if nr+nc <= 1 then error("there are not matrix 0x0") end
     local m = {
         nrows = nr,
         ncols = nc,
-        data = args,
         type = "matrix"
     }
     
+    m.data = setmetatable(
+      {}, 
+      {
+        __call=function(s, ...) 
+          m.data={...} 
+          return m 
+        end
+      }
+    )
+    
     return setmetatable(m, MatrixPropieties)
   end
-  
-  function Matrix.TransformInMatrix(t)
-    if type(t)=="table" then
-        return Matrix.CreateMatrix(unpack(t)) 
-        
-    elseif type(t)=="function" then  
-        return Matrix.CreateMatrix(unpack(t())) 
-    else
-        error("expected a table or function in this function")
-    end
-  end
-
-
 
   function Matrix.CreateColumnMatrix(...)
     local items = {...}
     local ni = #items
-    return Matrix.CreateMatrix(1, ni, items)
+    
+    return Matrix
+      .CreateMatrix(1, ni)
+      .data(unpack(items))
   end
 
   function Matrix.CreateRowMatrix(...)
     local items = {...}
     local ni = #items
-    return Matrix.CreateMatrix(ni, 1, items)
+    
+    return Matrix
+      .CreateMatrix(ni, 1)
+      .data(unpack(items))
   end
 
   function Matrix.CreateNullMatrix(NumRows, NumCols)
@@ -55,7 +53,9 @@ local function Assembler(MatrixPropieties)
       m[i]=0
     end
     
-    return Matrix.CreateMatrix(NumRows, NumCols, m)
+    return Matrix
+      .CreateMatrix(NumRows, NumCols)
+      .data(unpack(m))
   end
 
 

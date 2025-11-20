@@ -1,21 +1,29 @@
 
+local unpack = table.unpack
+
 return function(MatrixSystem)
     local ops = {}
     
     ops.map = function(m, funct)
         local NewMatrix = {}
+        local cols, rows = m.ncols, m.nrows
+
         if type(funct) == "function" then        
-            for itens = 1, m.nrows*m.ncols do
-              local row = (itens-1)%m.nrows +1
-              local col = (itens//m.nrows-1) % m.ncols +1
-              local currentValue = m[{row,col}] 
-               NewMatrix[itens] = funct(row, col, currentValue)
+            for idx = 1, rows*cols do
+                local pos = {
+                    ((idx-1)//cols) + 1,
+                    ((idx-1)%cols) + 1
+                }
+                
+                local currentValue = m[pos]
+                
+                NewMatrix[idx] = funct({i=pos[1], j=pos[2]}, currentValue) or currentValue
             end
         else
             error("expected a function")
         end
 
-        return MatrixSystem.CreateMatrix(m.nrows, m.ncols, NewMatrix)
+        return MatrixSystem.CreateMatrix(rows, cols).data(unpack(NewMatrix)) 
     end
 
     return ops
