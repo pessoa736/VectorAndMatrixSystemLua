@@ -1,4 +1,4 @@
-
+local unpack = table.unpack
 
 return function(MatrixSystem)
   local ops = {}
@@ -9,18 +9,15 @@ return function(MatrixSystem)
     local ncols = m1.ncols
     
     local sub = {}
-    for i = 1, nrows  do
-        if i ~= row then
-            local new_row = {}
-            for j = 1, ncols do
-                if j ~= col then
-                    table.insert(new_row, m1[{i, j}])
-                end
-            end
-            table.insert(sub, new_row)
+    for idx = 1, nrows*ncols  do
+        local i = (idx-1)//ncols+1
+        local j = (idx-1)%ncols+1 
+
+        if i ~= row and j ~= col then
+            table.insert(sub, m1[{i, j}])
         end
     end
-    return MatrixSystem.TransformInMatrix(sub)
+    return MatrixSystem.CreateMatrix(nrows-1, ncols-1).data(unpack(sub))
   end
   
   return ops
