@@ -33,7 +33,7 @@ local V = require("vectors")    -- exports from vectors/core.lua
 local M = require("matrix")     -- exports from matrix/core.lua
 ```
 
-Breaking change (since 1.0-4): the root `init.lua` aggregator module was removed; require modules directly.
+Breaking change (since 1.0-3): the root `init.lua` aggregator module was removed; require modules directly.
 
 ### Without LuaRocks (adjusting package.path)
 
