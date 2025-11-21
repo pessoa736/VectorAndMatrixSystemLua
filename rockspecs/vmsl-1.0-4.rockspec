@@ -1,5 +1,5 @@
 package = "VMSL"
-version = "1.0-3"
+version = "1.0-4"
 source = {
    url = "git+https://github.com/pessoa736/VectorAndMatrixSystemLua",
    tag = "v1.0"
