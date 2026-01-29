@@ -2,7 +2,7 @@
 
 return function(VectorSystem)
     local IsVector = VectorSystem.IsVector
-    local ops = {}
+    local ops = table.create(0,1)
 
     ops.projection = function(v1, v2)
         

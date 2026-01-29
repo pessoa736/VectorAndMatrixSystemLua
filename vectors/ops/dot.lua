@@ -3,7 +3,7 @@
 
 return function(VectorSystem)
     local IsVector = VectorSystem.IsVector
-    local ops = {}
+    local ops = table.create(0, 1)
     
     ops.Dot = function(v1, v2)
         local Is1, type1 = IsVector(v1)

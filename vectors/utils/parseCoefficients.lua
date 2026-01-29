@@ -6,7 +6,7 @@ return function (expr, n)
     local len = #expr
     local pos = 1
 
-    local coeffs = {}
+    local coeffs = table.create(n)
     for i = 1, n do coeffs[i] = 0 end
 
     local function add(sym, num, sign)

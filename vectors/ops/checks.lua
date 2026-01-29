@@ -2,7 +2,7 @@
 
 return function(VectorSystem)
     local ISV = VectorSystem.IsVector
-    local ops = {}
+    local ops = table.create(0, 1)
 
     
     ops.checkEquipollence = function(s, otherVector)

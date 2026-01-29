@@ -12,3 +12,7 @@
 logs/
 coverage/
 
+/luarocks
+/lua
+/lua_modules
+/.luarocks

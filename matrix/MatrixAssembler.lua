@@ -1,4 +1,4 @@
-
+---@version 5.5
 
 local unpack = table.unpack
 
@@ -9,14 +9,14 @@ local function Assembler(MatrixPropieties)
   function Matrix.CreateMatrix(nr, nc)
 
     if nr+nc <= 1 then error("there are not matrix 0x0") end
-    local m = {
-        nrows = nr,
-        ncols = nc,
-        type = "matrix"
-    }
-    
+
+    local m = table.create(0, 4)
+    m.nrows = nr
+    m.ncols = nc
+    m.type = "matrix"
+
     m.data = setmetatable(
-      {}, 
+      table.create(nr*nc), 
       {
         __call=function(s, ...) 
           m.data={...} 
@@ -49,7 +49,7 @@ local function Assembler(MatrixPropieties)
   function Matrix.CreateNullMatrix(NumRows, NumCols)
     local m = {}
     
-    for i = 1, NumRows*NumCols do
+    for i = 1, NumCols*NumRows do
       m[i]=0
     end
     

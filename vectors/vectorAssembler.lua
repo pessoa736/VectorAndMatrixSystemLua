@@ -39,14 +39,12 @@ function AssemblerCreate(VectorProperties)
 
     
     function Assembler.CreateConstVector(dimentions, value)
-        local dimentions = dimentions or 1
-        local value = value or 0
 
-        if dimentions< 1 then error("It is not possible to create a vector with a dimension smaller than 1") end
+        if not dimentions>= 1 then error("It is not possible to create a vector with a dimension smaller than 1") end
 
         return Assembler.transformInVector(
             function ()
-                local v = {}
+                local v = table.create(dimentions)
                 for i=1, dimentions do
                     v[i] = value
                 end

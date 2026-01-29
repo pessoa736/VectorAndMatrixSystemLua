@@ -5,7 +5,7 @@ return function(MatrixSystem)
     
     ops.isCompatibleForMult = function(m1, m2)
         if not MatrixSystem.IsMatrix(m2) then error(tostring(m2) .. " is not a matrix") end
-        return m1.ncols == m2.nrows 
+        return m1.ncols == m2.nrows
     end
 
     ops.isCompatibleForSum = function(m1, m2)
