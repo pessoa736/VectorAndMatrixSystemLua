@@ -22,5 +22,6 @@ build = {
    modules = {
       vectors = "src/vector.c",
       matrix  = "src/matrix.c"
-   }
+   },
+   copy_directories = { "types" }
 }
