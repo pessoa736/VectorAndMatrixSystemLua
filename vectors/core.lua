@@ -1,6 +1,10 @@
+---@type table
 local properties = {} 
 
 
+---@param s Vector
+---@param k integer|string
+---@return any
 properties.__index = function(s, k)
     if type(k) == "number" then
         return s.points[k]
@@ -16,8 +20,11 @@ properties.__newindex = function(s, k, v)
 end
 
 
+---@type VectorSystem
 local VectorSystem = require("vectors.vectorAssembler")(properties)
 
+--- Registra operações na metatabela compartilhada
+---@param prop fun(system: VectorSystem): table
 local function addProperties(prop)
     for k, v in pairs(prop(VectorSystem)) do
         properties[k] = v
@@ -43,6 +50,8 @@ end
 
 
 
+---@type VectorSystem
 VectorSystem = require("vectors.vectorAssembler")(properties)
 
+---@type VectorSystem
 return VectorSystem

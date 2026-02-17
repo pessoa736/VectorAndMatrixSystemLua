@@ -1,14 +1,21 @@
 
 local pi = math.pi
 
+---@param VectorSystem VectorSystem
+---@return table
 return function(VectorSystem)
     local ISV = VectorSystem.IsVector
     local ops = {}
 
+    ---@type VectorCircumference
     ops.Circumference = setmetatable({}, {__call=function (...)
         return ops.Circumference.getRadius(...)
     end}) 
     
+    --- Calcula o raio (distância ao quadrado) entre dois vetores
+    ---@param v1 Vector
+    ---@param v2 Vector
+    ---@return number
     ops.Circumference.getRadius = function(v1, v2)
         local IS1 = ISV(v1)
         local IS2 = ISV(v2)
@@ -22,6 +29,10 @@ return function(VectorSystem)
         return  radius
     end
     
+    --- Calcula o perímetro da circunferência entre dois vetores
+    ---@param v1 Vector
+    ---@param v2 Vector
+    ---@return number
     ops.Circumference.getPerimeter = function(v1, v2)
         local IS1 = ISV(v1)
         local IS2 = ISV(v2)

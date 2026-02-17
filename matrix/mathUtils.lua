@@ -1,7 +1,22 @@
+--- Verifica se o valor é numérico
+---@param x any
+---@return boolean
 local function isnum(x) return type(x) == "number" end
+
+--- Converte o valor para string
+---@param x any
+---@return string
 local function tostr(x) return tostring(x) end
+
+--- Verifica se a string contém + ou - (precisa de parênteses)
+---@param s string
+---@return boolean
 local function needParens(s) return s:find("[%+%-]") ~= nil end
 
+--- Multiplicação simbólica/numérica
+---@param a number|string
+---@param b number|string
+---@return number|string
 local function mul(a, b)
     if isnum(a) and isnum(b) then
         return a * b
@@ -26,6 +41,9 @@ local function mul(a, b)
     return sa .. "*" .. sb
 end
 
+--- Determinante simbólico estendido (retorna expressão string ou número)
+---@param mm Matrix
+---@return number|string
 local function extDet( mm)
     local m = mm.data
     local m1 = m[1]
@@ -69,4 +87,5 @@ local function extDet( mm)
     end
 end
 
+---@type MathUtils
 return {isnum = isnum, tostr = tostr, needParens = needParens, mul = mul, extDet = extDet}

@@ -1,6 +1,10 @@
 
+---@type table
 local Properties = {}
 
+---@param s Matrix
+---@param k table|integer|string
+---@return any
 Properties.__index = function(s, k)
     local t = type(k)
     if t == "table" then
@@ -14,7 +18,10 @@ Properties.__index = function(s, k)
     end
 end
 
--- Permite escrita usando m[{i,j}] = valor ou m[k] (linear) = valor
+--- Permite escrita usando m[{i,j}] = valor ou m[k] (linear) = valor
+---@param s Matrix
+---@param k table|integer|string
+---@param v any
 Properties.__newindex = function(s, k, v)
     local t = type(k)
     if t == "table" then
@@ -31,16 +38,19 @@ end
 -- Forward declaration so addProperties can capture it as an upvalue
 --local MatrixSystem
 
+--- Registra operações na metatabela compartilhada
+---@param prop fun(system: MatrixSystem): table
 local function addProperties(prop)
     for k, v in pairs(prop(MatrixSystem)) do
         rawset(Properties, k, v)
     end
 end
 
--- Create the MatrixSystem first so ops can reference it
+-- Cria o MatrixSystem para que os ops possam referenciá-lo
+---@type MatrixSystem
 MatrixSystem = require("matrix.MatrixAssembler")(Properties)
 
--- Attach operations to the metatable
+-- Registra operações na metatabela
 addProperties(require("matrix.ops.check"))
 addProperties(require("matrix.ops.map"))
 addProperties(require("matrix.ops.common"))
@@ -49,4 +59,5 @@ addProperties(require("matrix.ops.submatrix"))
 addProperties(require("matrix.ops.determinat"))
 addProperties(require("matrix.ops.translation"))
 
+---@type MatrixSystem
 return MatrixSystem

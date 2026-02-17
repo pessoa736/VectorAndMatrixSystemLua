@@ -2,9 +2,14 @@
 local ut = require("matrix.mathUtils")
 local extDet = ut.extDet
 
+---@param MatrixSystem MatrixSystem
+---@return table
 return function(MatrixSystem)
     local ops = {}
 
+    --- Calcula o determinante da matriz (deve ser quadrada)
+    ---@param selfMatrix Matrix
+    ---@return number
     ops.determinant=function (selfMatrix)
         local m = selfMatrix.data
         local n = #m
@@ -37,6 +42,9 @@ return function(MatrixSystem)
 
         return det
     end
+    --- Calcula o determinante simbólico estendido
+    ---@param m1 Matrix
+    ---@return number|string
     ops.ExtendDeterminant = function(m1)
         return extDet(m1)
     end

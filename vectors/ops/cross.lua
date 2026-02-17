@@ -1,11 +1,17 @@
 
 local unpack = table.unpack
 
+---@param VectorSystem VectorSystem
+---@return table
 return function(VectorSystem)
     local Mat = require("matrix.core").CreateMatrix
     local CreateVector = VectorSystem.CreateVector
     local ops = {}
 
+    --- Produto vetorial generalizado em R^n
+    ---@param v1 Vector
+    ---@param ... Vector
+    ---@return Vector
     function ops.Cross(v1, ...)
         local vectors = {v1, ...}
         if #vectors < 1 then error("expected at least one vector") end
@@ -82,7 +88,10 @@ return function(VectorSystem)
 
 
 
-    -- Accept the first vector (self) explicitly so the colon call works
+    --- Produto vetorial otimizado para 2D e 3D
+    ---@param v1 Vector
+    ---@param ... Vector
+    ---@return Vector
     function ops.CrossProduct_2D_or_3D(v1, ...)
         local vectors = {v1, ...}
         local Nvectors = #vectors

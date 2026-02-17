@@ -1,8 +1,13 @@
 
 
+---@param MatrixSystem MatrixSystem
+---@return table
 return function(MatrixSystem)
     local ops = {}
 
+    ---@param m1 Matrix
+    ---@param m2 Matrix
+    ---@return Matrix
     ops.__add = function(m1, m2)
         if not m1:isCompatibleForSum(m2) then
             error("Matrices must have the same dimensions for addition.")
@@ -13,6 +18,9 @@ return function(MatrixSystem)
     end
 
     -- subtração
+    ---@param m1 Matrix
+    ---@param m2 Matrix
+    ---@return Matrix
     ops.__sub = function(m1, m2)
         if not m1:isCompatibleForSum(m2) then
             error("Matrices must have the same dimensions for addition.")
@@ -22,17 +30,26 @@ return function(MatrixSystem)
     end
 
     -- Multiplicação
+    ---@param a Matrix|number
+    ---@param b Matrix|number
+    ---@return Matrix
     ops.__mul = function(a, b)
         local isMA, tyA = MatrixSystem.IsMatrix(a)
         local isMB, tyB = MatrixSystem.IsMatrix(b)
 
         if tyA == "number" and isMB then
+            ---@cast a number
+            ---@cast b Matrix
             return b:map(function (_, currentValue) return a * currentValue end) 
 
         elseif tyB == "number" and isMA then
+            ---@cast a Matrix
+            ---@cast b number
             return a:map(function (_, currentValue) return b * currentValue end) 
 
         elseif isMA and  isMB then
+            ---@cast a Matrix
+            ---@cast b Matrix
             
             -- Multiplicação de matrizes
             if not a:isCompatibleForMult(b) then
@@ -56,6 +73,8 @@ return function(MatrixSystem)
         end
     end
 
+    ---@param m Matrix
+    ---@return string
     ops.__tostring = function(m)
         local s = ""
 
@@ -70,6 +89,9 @@ return function(MatrixSystem)
         return s
     end
     
+    ---@param m1 Matrix|any
+    ---@param v any
+    ---@return string
     ops.__concat = function (m1, v)
         return tostring(m1) .. tostring(v)
     end

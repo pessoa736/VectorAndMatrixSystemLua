@@ -1,4 +1,7 @@
-
+--- Extrai coeficientes de uma expressão algébrica em variáveis a..z
+---@param expr string|any  expressão a ser parseada
+---@param n integer         número de variáveis (1=a, 2=a,b, …)
+---@return number[]         coeficientes indexados de 1 a n
 return function (expr, n)
     if type(expr) ~= "string" then expr = tostring(expr or "") end
 
@@ -6,7 +9,7 @@ return function (expr, n)
     local len = #expr
     local pos = 1
 
-    local coeffs = table.create(n)
+    local coeffs = {}
     for i = 1, n do coeffs[i] = 0 end
 
     local function add(sym, num, sign)

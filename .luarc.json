@@ -1,0 +1,29 @@
+{
+    "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+    "runtime": {
+        "version": "Lua 5.4",
+        "path": [
+            "?.lua",
+            "?/core.lua"
+        ]
+    },
+    "workspace": {
+        "library": [
+            "types"
+        ],
+        "checkThirdParty": false
+    },
+    "diagnostics": {
+        "disable": [
+            "lowercase-global"
+        ]
+    },
+    "hint": {
+        "enable": true,
+        "setType": true,
+        "paramName": "All"
+    },
+    "type": {
+        "castNumberToInteger": true
+    }
+}

@@ -1,8 +1,15 @@
 local unpack = table.unpack
 
+---@param MatrixSystem MatrixSystem
+---@return table
 return function(MatrixSystem)
   local ops = {}
   
+  --- Extrai uma submatriz removendo a linha `row` e a coluna `col`
+  ---@param m1 Matrix
+  ---@param row integer
+  ---@param col integer
+  ---@return Matrix
   ops.submatrix = function(m1, row, col)
     local m = m1.data
     local nrows = m1.nrows

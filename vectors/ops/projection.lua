@@ -1,9 +1,15 @@
 
 
+---@param VectorSystem VectorSystem
+---@return table
 return function(VectorSystem)
     local IsVector = VectorSystem.IsVector
-    local ops = table.create(0,1)
+    local ops = {}
 
+    --- Projeção de v2 sobre v1
+    ---@param v1 Vector
+    ---@param v2 Vector
+    ---@return Vector
     ops.projection = function(v1, v2)
         
         local size 

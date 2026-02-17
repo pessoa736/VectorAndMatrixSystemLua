@@ -1,9 +1,15 @@
 
 local unpack = table.unpack
 
+---@param MatrixSystem MatrixSystem
+---@return table
 return function(MatrixSystem)
     local ops = {}
     
+    --- Aplica uma função a cada elemento e retorna uma nova matriz
+    ---@param m Matrix
+    ---@param funct fun(pos: MatrixPos, currentValue: number): number?
+    ---@return Matrix
     ops.map = function(m, funct)
         local NewMatrix = {}
         local cols, rows = m.ncols, m.nrows
