@@ -2,138 +2,178 @@
 
 ## Visão geral do projeto
 
-Biblioteca Lua leve para criação e manipulação de vetores N-dimensionais e matrizes M×N, voltada para jogos e simulações. O pacote é distribuído via LuaRocks como `vmsl`.
+Biblioteca Lua para criação e manipulação de vetores N-dimensionais e matrizes M×N, voltada para jogos e simulações. O core é implementado em **C** (Lua C API) para máximo desempenho. O pacote é distribuído via LuaRocks como `vmsl`.
 
-- **Linguagem:** Lua >= 5.4 (usa operador `//`, `table.unpack`)
+- **Linguagem:** C (Lua C API) + Lua >= 5.4
 - **Licença:** MIT
 - **Status:** API experimental — nomes, assinaturas e comportamento podem mudar
 
 ## Estrutura do projeto
 
 ```
-vectors/
-  core.lua              # Ponto de entrada: require("vectors")
-  vectorAssembler.lua   # Fábricas: CreateVector, IsVector, CreateConstVector, etc.
-  ops/                  # Operações (cada arquivo = uma responsabilidade)
-    common.lua          # Metamétodos: __add, __sub, __mul, __unm, __len, __tostring
-    dot.lua             # Produto escalar (Dot)
-    cross.lua           # Produto vetorial generalizado (Cross)
-    projection.lua      # Projeção vetorial
-    map.lua             # Iteração/mapeamento sobre componentes
-    checks.lua          # Verificações de equipolência e tipo
-    circumference.lua   # Operações de circunferência
-  utils/
-    parseCoefficients.lua
-  tests/                # Testes de benchmark (sem framework de asserção)
+src/
+  vector.c              # Módulo C: luaopen_vectors (require("vectors"))
+  matrix.c              # Módulo C: luaopen_matrix  (require("matrix"))
 
-matrix/
-  core.lua              # Ponto de entrada: require("matrix")
-  MatrixAssembler.lua   # Fábricas: CreateMatrix, CreateRowMatrix, CreateColumnMatrix, etc.
-  definitions.lua       # (reservado para definições futuras)
-  mathUtils.lua         # Utilitários matemáticos auxiliares
-  ops/                  # Operações de matriz
-    common.lua          # Metamétodos: __add, __sub, __mul, __tostring
-    check.lua           # Verificações de compatibilidade dimensional
-    map.lua             # Map sobre elementos da matriz
-    submatrix.lua       # Extração de submatrizes
-    determinat.lua      # Cálculo de determinante (nota: nome do arquivo tem typo)
-    translation.lua     # Transposição/translação
-  tests/                # Testes de benchmark
+vectors/                # Implementação Lua legada (referência)
+  core.lua
+  vectorAssembler.lua
+  ops/
+  utils/
+  tests/
+
+matrix/                 # Implementação Lua legada (referência)
+  core.lua
+  MatrixAssembler.lua
+  ops/
+  tests/
+
+types/
+  vmsl.lua              # Definições de tipo LuaLS (@meta)
 
 rockspecs/              # Especificações LuaRocks
+Makefile                # Build dos módulos C (.so/.dll)
 ```
 
-## Padrões de arquitetura
+## Arquitetura C
 
-### Padrão de módulo — Factory Function
+### Estruturas de dados
 
-Cada arquivo em `ops/` exporta uma **função fábrica** que recebe o sistema pai (`MatrixSystem` ou `VectorSystem`) como closure e retorna uma tabela de operações:
+Vetores e matrizes são **userdata** com flexible array members:
 
-```lua
--- Padrão obrigatório para novos módulos de operação
-return function(MatrixSystem)   -- ou VectorSystem
-    local ops = {}
+```c
+typedef struct {
+    int dim;
+    double pts[];       /* componentes do vetor */
+} Vector;               /* metatable: "VMSL.Vector" */
 
-    function ops.minhaOperacao(self, ...)
-        -- implementação
-    end
-
-    return ops
-end
+typedef struct {
+    int nrows;
+    int ncols;
+    double data[];      /* row-major */
+} Matrix;               /* metatable: "VMSL.Matrix" */
 ```
 
-As operações são registradas na metatabela compartilhada via `addProperties` nos arquivos `core.lua`.
+### Padrões C obrigatórios
 
-### Padrão Assembler
+- Cada módulo exporta `luaopen_<nome>` como ponto de entrada
+- Helpers `*_new`, `*_check`, `*_test` para criar/validar userdata
+- Métodos registrados na metatable com `luaL_setfuncs`
+- `__index` customizado: numérico → dados, string → propriedade/método, table → acesso `{i,j}` (matrizes)
+- Alocação via `lua_newuserdata` (GC gerenciado pelo Lua)
+- `malloc`/`free` apenas para buffers temporários (determinante, cross product)
 
-Construtores de objetos ficam nos módulos Assembler (`MatrixAssembler.lua`, `vectorAssembler.lua`). O Assembler recebe a metatabela e retorna a tabela do sistema com as funções de criação.
+### Builder pattern (matrizes)
 
-### Metatabelas
+`CreateMatrix(nr, nc).data(...)` funciona via:
+1. `__index` intercepta key `"data"` → retorna C closure
+2. A closure tem o userdata como upvalue
+3. Quando chamada, preenche `m->data[]` e retorna o userdata
 
-- **Uma metatabela compartilhada** por tipo (`Properties` para matrizes, `properties` para vetores).
-- Vetores armazenam dados em `self.points[]`, dimensão em `self.Dimensions`.
-- Matrizes armazenam dados em `self.data[]` (linear, row-major), dimensões em `self.nrows` / `self.ncols`.
-- Acesso por índice composto: `m[{i, j}]` ou `m[{i=1, j=2}]` para matrizes.
-- Discriminação de tipo via campo `.type` (`"matrix"` ou `"vector"`).
+## API pública
+
+### Vector (`require("vectors")`)
+
+| Função/Método | Descrição |
+|---|---|
+| `CreateVector(...)` | Cria vetor N-dimensional |
+| `CreateConstVector(n, val)` | Vetor de dimensão `n`, todos = `val` |
+| `CreateVectorZero(n)` | Vetor nulo |
+| `CreateVectorOne(n)` | Vetor unitário |
+| `IsVector(t)` → `bool, string` | Verifica tipo |
+| `v:Dot(v2)` | Produto escalar ou multiplicação escalar |
+| `v:Cross(...)` | Produto vetorial (2D, 3D, nD) |
+| `v:projection(v2)` | Projeção de v2 sobre v |
+| `v:map(fn)` | Aplica `fn(dim, val)` a cada componente |
+| `v:checkEquipollence(v2)` | Verifica mesma dimensão |
+| `Circumference.getRadius(v1, v2)` | Distância ao quadrado |
+| `Circumference.getPerimeter(v1, v2)` | Perímetro |
+| `v[k]` | Acesso ao componente k |
+| `v.Dimensions`, `v.type`, `v.points` | Propriedades |
+| `+`, `-`, `*`, `#`, `-v`, `..` | Operadores |
+
+### Matrix (`require("matrix")`)
+
+| Função/Método | Descrição |
+|---|---|
+| `CreateMatrix(nr, nc)` | Cria matriz (preencher com `.data(...)`) |
+| `CreateRowMatrix(...)` | Matriz-linha (n×1) |
+| `CreateColumnMatrix(...)` | Matriz-coluna (1×n) |
+| `CreateNullMatrix(nr, nc)` | Matriz zero |
+| `IsMatrix(t)` → `bool, string` | Verifica tipo |
+| `m:map(fn)` | Aplica `fn({i,j}, val)` a cada elemento |
+| `m:determinant()` | Determinante (matriz quadrada) |
+| `m:submatrix(row, col)` | Remove linha e coluna |
+| `m:T()` | Transposta |
+| `m:isCompatibleForSum(m2)` | Verifica dimensões para soma |
+| `m:isCompatibleForMult(m2)` | Verifica dimensões para multiplicação |
+| `m:isSquare()` | Verifica se é quadrada |
+| `m[{i,j}]`, `m[{i=1,j=2}]` | Acesso por posição |
+| `m[k]` | Acesso linear |
+| `m.nrows`, `m.ncols`, `m.type` | Propriedades |
+| `+`, `-`, `*`, `..` | Operadores |
 
 ## Convenções de código
+
+### C
+
+- Indentação com **4 espaços**
+- Prefixo `vec_` para funções de vetor, `mat_` para matriz
+- `static` para todas as funções internas (apenas `luaopen_*` é exportada)
+- Mensagens de erro em inglês via `luaL_error`
+- Usar `luaL_Buffer` para construção de strings
+- Flexible array members (C99) para dados contíguos
+- Liberar buffers temporários com `free()` antes de qualquer `return`
+
+### Lua (testes / código legado)
+
+- Indentação com **4 espaços**
+- `local` para todas as variáveis
+- Strings com aspas duplas (`"`)
+- Comentários preferencialmente em português
 
 ### Nomenclatura
 
 | Elemento | Convenção | Exemplos |
 |---|---|---|
-| Funções construtoras | PascalCase | `CreateVector`, `CreateMatrix`, `CreateNullMatrix` |
-| Operações matemáticas (vetores) | PascalCase | `Dot`, `Cross`, `Circumference` |
-| Operações matemáticas (matrizes) | camelCase | `map`, `determinant`, `submatrix` |
-| Metamétodos | prefixo `__` (padrão Lua) | `__add`, `__mul`, `__tostring` |
-| Variáveis locais | curtas/abreviadas | `m`, `v1`, `nr`, `nc`, `s` |
-| Nomes de arquivo | camelCase ou lowercase | `vectorAssembler.lua`, `common.lua` |
-| Verificadores de tipo | PascalCase com prefixo `Is` | `IsVector`, `IsMatrix` |
+| Funções construtoras | PascalCase | `CreateVector`, `CreateMatrix` |
+| Operações (vetores) | PascalCase | `Dot`, `Cross` |
+| Operações (matrizes) | camelCase | `map`, `determinant`, `submatrix` |
+| Verificadores de tipo | PascalCase com `Is` | `IsVector`, `IsMatrix` |
+| Funções C internas | snake_case com prefixo | `vec_add`, `mat_mul` |
+| Macros | UPPER_CASE | `VECTOR_MT`, `MATRIX_MT` |
 
-### Idioma
+## Build
 
-- **Comentários:** mistura de português e inglês (preferir inglês para novo código).
-- **Mensagens de erro:** preferencialmente em inglês para interoperabilidade.
-- **Documentação (README):** versões em inglês e português.
+```bash
+make                    # compila vectors.so e matrix.so
+make install            # instala em LUA_CMOD
+make clean              # limpa artefatos
 
-### Tratamento de erros
+# Variáveis configuráveis:
+# LUA_VERSION=5.4  LUA_INC=...  LUA_CMOD=...
 
-- Usar `error("mensagem descritiva")` com mensagens em inglês.
-- Validar dimensões e tipos antes de operar (sem `pcall`/`xpcall`).
-- Verificar compatibilidade com funções como `checkEquipollence`, `isCompatibleForSum`, `isCompatibleForMult`.
-
-### Estilo de código
-
-- Sem ponto-e-vírgula no final das linhas (exceto casos raros já existentes).
-- Indentação com **4 espaços**.
-- `local` para todas as variáveis e funções (evitar globais).
-- Usar `table.unpack` em vez de `unpack` global.
-- Strings com aspas duplas (`"`) como padrão.
-
-## Criação de novos módulos de operação
-
-1. Criar o arquivo em `vectors/ops/` ou `matrix/ops/`.
-2. Seguir o padrão factory function que retorna tabela de operações.
-3. Registrar o módulo no respectivo `core.lua` via `addProperties(require("caminho.do.modulo"))`.
-4. Cada operação recebe `self` como primeiro parâmetro (chamada com `:`).
+# Via LuaRocks:
+luarocks make rockspecs/vmsl-1.1-1.rockspec
+```
 
 ## Testes
 
-- Testes ficam em `vectors/tests/` e `matrix/tests/`.
-- Usar `TestFunctions.lua` local para utilitários de benchmark (`setStart`, `setFinal`, `showtime`, `reapeatTest`).
-- Testes atuais são benchmarks de performance, não asserções de corretude.
-- Executar testes diretamente: `lua matrix/tests/create.lua` ou `lua vectors/tests/cross/3D.lua`.
+- Testes ficam em `vectors/tests/` e `matrix/tests/`
+- Executar com `lua5.4 -e 'package.cpath=...;./?.so"' <test_file>`
+- `TestFunctions.lua` fornece utilitários de benchmark
 
 ## Dependências
 
-- **Lua** >= 5.4
-- **loglua** (listada no rockspec)
-- Não usar `table.create` (extensão Luau — incompatível com Lua padrão)
+- **Lua** >= 5.4 (headers: `lua.h`, `lauxlib.h`)
+- **Compilador C** com suporte a C99 (flexible array members)
+- Sem dependências externas de runtime
 
 ## Notas importantes
 
-- A API é **experimental** — priorizar simplicidade e legibilidade.
-- Manter compatibilidade com o padrão factory function ao adicionar operações.
-- Operador `#` em vetores retorna dimensão (via `__len`), não o tamanho da tabela.
-- Multiplicação vetor × vetor (`__mul`) delega para `Dot` (produto escalar).
-- Multiplicação escalar × matriz e matriz × matriz são tratadas no mesmo `__mul`.
+- A API é **experimental** — priorizar simplicidade e legibilidade
+- Operador `#` em vetores retorna dimensão (via `__len`)
+- `v * v` → dot product (`__mul` delega para `Dot`)
+- Acesso `m.data(...)` é um builder pattern via closure C
+- Determinante usa expansão de cofatores (O(n!)) — adequado para matrizes pequenas
+- Os arquivos Lua em `vectors/` e `matrix/` são a implementação legada mantida como referência

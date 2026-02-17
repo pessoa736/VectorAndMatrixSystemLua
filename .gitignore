@@ -6,6 +6,10 @@
 *.rock
 *.src.rock
 *.all.rock
+*.so
+*.dll
+*.dylib
+*.o
 .luarocks/
 *.log
 *log.txt
