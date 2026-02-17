@@ -6,9 +6,12 @@
 *.rock
 *.src.rock
 *.all.rock
-.luarocks/
+/.luarocks
+/lua_modules
+lua
+luarocks
 *.log
 *log.txt
-logs/
-coverage/
+/logs
+/coverage
 
