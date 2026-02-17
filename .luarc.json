@@ -3,13 +3,16 @@
     "runtime": {
         "version": "Lua 5.4",
         "path": [
-            "?.lua",
-            "?/core.lua"
+            "?.lua"
         ]
     },
     "workspace": {
         "library": [
             "types"
+        ],
+        "ignoreDir": [
+            "vectors",
+            "matrix"
         ],
         "checkThirdParty": false
     },
